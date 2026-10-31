@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emotion Thunder Quest</title>
+<style>
+:root{
+  --navy:#172554; --blue:#2563eb; --cyan:#38bdf8; --yellow:#facc15;
+  --pink:#f9a8d4; --purple:#a78bfa; --green:#22c55e; --red:#fb7185;
+  --ink:#172033; --paper:#fffdf5;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; font-family: "Trebuchet MS", Arial, sans-serif;
+  color:var(--ink); background:linear-gradient(135deg,#dbeafe,#fce7f3 55%,#fef3c7);
+}
+button{font:inherit; cursor:pointer}
+.app{max-width:1120px;margin:0 auto;padding:18px}
+header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--navy);color:white;border-radius:22px;padding:16px 22px;
+  box-shadow:0 8px 0 #0f1d46;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{font-size:36px}
+h1{font-size:clamp(22px,4vw,34px);margin:0;letter-spacing:.4px}
+.tagline{font-size:13px;color:#bfdbfe;margin-top:3px}
+.pill{background:#ffffff1c;border:1px solid #ffffff40;padding:9px 14px;border-radius:30px;font-weight:bold}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.stat{background:#ffffffd9;border:2px solid white;border-radius:17px;padding:12px;text-align:center;box-shadow:0 4px 0 #c7d2fe}
+.stat small{display:block;color:#64748b;font-weight:bold;font-size:12px;text-transform:uppercase}
+.stat strong{font-size:24px;color:var(--navy)}
+main{background:#ffffffeb;border:3px solid white;border-radius:24px;padding:clamp(16px,3vw,28px);box-shadow:0 10px 0 #c7d2fe}
+.topline{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.progress-wrap{height:12px;background:#e2e8f0;border-radius:30px;overflow:hidden;margin:12px 0 20px}
+#progress{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#8b5cf6,#f472b6);transition:width .3s}
+.question-card{background:linear-gradient(135deg,#eff6ff,#fdf2f8);border-radius:20px;padding:22px;text-align:center;border:2px solid #dbeafe}
+.eyebrow{font-size:13px;font-weight:bold;color:#6366f1;text-transform:uppercase;letter-spacing:1px}
+#scenario{font-size:clamp(20px,3vw,28px);line-height:1.35;margin:10px auto;max-width:800px;color:#172554}
+#hint{color:#475569;margin:0;font-size:15px}
+.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.answer{
+  min-height:128px;border:3px solid transparent;border-radius:20px;padding:14px 10px;
+  background:white;box-shadow:0 5px 0 #cbd5e1;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;gap:8px;transition:.15s;position:relative;
+}
+.answer .emoji{font-size:42px}
+.answer .word{font-size:19px;font-weight:900;color:#172554}
+.answer:nth-child(1){background:#fef3c7;border-color:#fcd34d}
+.answer:nth-child(2){background:#dbeafe;border-color:#93c5fd}
+.answer:nth-child(3){background:#fce7f3;border-color:#f9a8d4}
+.answer.selected{outline:5px solid #7c3aed;transform:translateY(-4px);box-shadow:0 8px 0 #7c3aed}
+.answer.correct{border-color:#22c55e;background:#dcfce7}
+.answer.wrong{border-color:#fb7185;background:#ffe4e6}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}
+.primary,.secondary{
+  border:0;border-radius:14px;padding:13px 22px;font-weight:900;
+}
+.primary{background:var(--blue);color:white;box-shadow:0 5px 0 #1e40af}
+.secondary{background:#e0e7ff;color:#312e81;box-shadow:0 5px 0 #c7d2fe}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.feedback{min-height:30px;text-align:center;font-size:18px;font-weight:900;margin-top:14px;color:#4338ca}
+.camera-panel{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:20px}
+.camera-box,.howto{background:#f8fafc;border:2px solid #e2e8f0;border-radius:18px;padding:14px}
+.camera-box h3,.howto h3{margin:0 0 8px;color:#1e3a8a}
+.video-wrap{position:relative;background:#0f172a;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
+video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#cameraStatus{font-size:13px;color:#475569;margin-top:8px}
+.howto p{margin:8px 0;font-size:14px;line-height:1.45}
+.gesture{display:inline-block;background:#e0e7ff;color:#312e81;border-radius:8px;padding:3px 7px;font-weight:bold}
+.overlay{
+  position:fixed;inset:0;background:#0f172acc;display:flex;align-items:center;justify-content:center;
+  padding:18px;z-index:10;
+}
+.modal{width:min(600px,100%);background:white;border-radius:26px;padding:30px;text-align:center;box-shadow:0 14px 0 #93c5fd}
+.modal .big{font-size:62px}
+.modal h2{font-size:30px;color:#172554;margin:8px 0}
+.modal p{line-height:1.55;color:#475569}
+.modal .primary{margin-top:10px}
+.hidden{display:none!important}
+.flash{position:fixed;inset:0;background:#fef08a;opacity:0;pointer-events:none;z-index:9}
+.flash.go{animation:flash .45s ease-out}
+@keyframes flash{0%{opacity:.85}100%{opacity:0}}
+@media(max-width:700px){
+ .app{padding:10px}header{padding:14px}.pill{font-size:12px}
+ .camera-panel{grid-template-columns:1fr}.answers{gap:8px}
+ .answer{min-height:112px;padding:8px 4px}.answer .emoji{font-size:34px}.answer .word{font-size:15px}
+}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div class="app">
+<header>
+  <div class="brand"><div class="logo">⚡</div><div><h1>EMOTION THUNDER QUEST</h1><div class="tagline">Kenali Emosi, Kuasai Misi!</div></div></div>
+  <div class="pill">🕵️ Misi Detektif Emosi</div>
+</header>
+
+<section class="stats">
+  <div class="stat"><small>⏱ Masa</small><strong id="timer">10:00</strong></div>
+  <div class="stat"><small>⭐ Markah</small><strong id="score">0</strong></div>
+  <div class="stat"><small>❤️ Nyawa</small><strong id="lives">❤️❤️❤️</strong></div>
+</section>
+
+<main>
+  <div class="topline"><strong id="questionCount">Soalan 1 daripada 10</strong><span id="gameState" class="pill" style="background:#dbeafe;color:#1e3a8a;border:0">Bersedia</span></div>
+  <div class="progress-wrap"><div id="progress"></div></div>
+  <div class="question-card">
+    <div class="eyebrow">⚡ Kenal pasti emosi dalam situasi ini</div>
+    <div id="scenario">Tekan “Mula Misi” untuk memulakan permainan.</div>
+    <p id="hint">Fikirkan perasaan watak berdasarkan situasi yang berlaku.</p>
+  </div>
+  <div class="answers" id="answers">
+    <button class="answer" data-index="0" onclick="mouseSelect(0)"><span class="emoji">😊</span><span class="word">Gembira</span></button>
+    <button class="answer" data-index="1" onclick="mouseSelect(1)"><span class="emoji">😢</span><span class="word">Sedih</span></button>
+    <button class="answer" data-index="2" onclick="mouseSelect(2)"><span class="emoji">😠</span><span class="word">Marah</span></button>
+  </div>
+  <div class="controls">
+    <button class="primary" id="startBtn" onclick="startGame()">⚡ Mula Misi</button>
+    <button class="secondary" id="fireBtn" onclick="fireAnswer()" disabled>✊ Lancarkan Kilat</button>
+    <button class="secondary" onclick="restartGame()">↻ Mula Semula</button>
+  </div>
+  <div class="feedback" id="feedback" aria-live="polite"></div>
+
+  <div class="camera-panel">
+    <div class="camera-box">
+      <h3>📷 Kamera Pengesan Tangan</h3>
+      <div class="video-wrap"><video id="inputVideo" autoplay playsinline muted></video></div>
+      <div id="cameraStatus">Kamera belum diaktifkan. Tekan “Aktifkan Kamera” selepas memulakan misi.</div>
+      <div class="controls" style="margin-top:10px"><button class="secondary" id="cameraBtn" onclick="enableCamera()">Aktifkan Kamera</button></div>
+    </div>
+    <div class="howto">
+      <h3>🖐️ Cara bermain</h3>
+      <p><span class="gesture">Tapak tangan terbuka</span> Gerakkan tangan ke kiri, tengah atau kanan untuk memilih jawapan.</p>
+      <p><span class="gesture">Genggam tangan</span> Lancarkan kilat untuk menghantar jawapan yang dipilih.</p>
+      <p>Jika kamera tidak dapat digunakan, murid masih boleh memilih jawapan dengan tetikus atau sentuhan pada skrin.</p>
+      <p><b>Nota:</b> Gerakan tangan ialah kawalan permainan sahaja, bukan pengesanan emosi sebenar.</p>
+    </div>
+  </div>
+</main>
+</div>
+
+<div class="overlay" id="intro">
+  <div class="modal">
+    <div class="big">⚡🕵️</div>
+    <h2>Selamat Datang, Detektif!</h2>
+    <p>Bersedia untuk menyelesaikan 10 kes emosi? Kenal pasti sama ada watak dalam setiap situasi berasa <b>gembira, sedih, marah</b> atau <b>takut</b>.</p>
+    <p>⏱️ Masa permainan: <b>10 minit</b> &nbsp; ⭐ Jawapan betul: <b>10 markah</b></p>
+    <button class="primary" onclick="closeIntro()">Saya Bersedia!</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="result">
+  <div class="modal">
+    <div class="big" id="resultIcon">🏆</div>
+    <h2 id="resultTitle">Misi Selesai!</h2>
+    <p id="resultText"></p>
+    <button class="primary" onclick="restartGame();closeResult()">Main Semula</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script>
+const questions = [
+ {q:"Aina mendapat hadiah hari lahir daripada ibu bapanya. Dia tersenyum dan melompat kegembiraan.",a:"Gembira",e:"😊",why:"Aina berasa gembira kerana menerima hadiah."},
+ {q:"Amir terjatuh ketika bermain lalu lututnya terluka. Dia mula menangis.",a:"Sedih",e:"😢",why:"Amir berasa sedih kerana terjatuh dan terluka."},
+ {q:"Danish sedang membina menara blok. Adiknya meruntuhkan menara itu. Danish mengerutkan dahi.",a:"Marah",e:"😠",why:"Danish berasa marah apabila menara bloknya dirobohkan."},
+ {q:"Mira terdengar bunyi guruh yang sangat kuat ketika hujan. Dia bersembunyi di belakang guru.",a:"Takut",e:"😨",why:"Mira berasa takut apabila terdengar bunyi guruh yang kuat."},
+ {q:"Sara bermain kejar-kejar bersama rakan-rakan di taman. Mereka ketawa dan tersenyum.",a:"Gembira",e:"😄",why:"Sara berasa gembira kerana seronok bermain bersama rakan."},
+ {q:"Hakim kehilangan pensel kesayangannya. Dia menundukkan kepala dan kelihatan muram.",a:"Sedih",e:"😢",why:"Hakim berasa sedih kerana kehilangan pensel kesayangannya."},
+ {q:"Lina sedang mewarna. Rakannya mengambil krayon tanpa meminta izin. Lina menunjukkan wajah tidak puas hati.",a:"Marah",e:"😠",why:"Lina berasa marah kerana krayonnya diambil tanpa izin."},
+ {q:"Ketika berada di bilik gelap, Faris terdengar bunyi yang tidak dikenalinya. Dia memeluk bantal dengan erat.",a:"Takut",e:"😨",why:"Faris berasa takut kerana terdengar bunyi yang tidak dikenalinya."},
+ {q:"Pasukan Mei menang dalam pertandingan sukaneka. Mei tersenyum lebar dan bersorak bersama kawan-kawan.",a:"Gembira",e:"🥳",why:"Mei berasa gembira kerana pasukannya menang."},
+ {q:"Rafiq tidak dapat bermain di luar kerana hujan. Dia duduk diam sambil memandang ke luar tingkap.",a:"Sedih",e:"😔",why:"Rafiq berasa sedih kerana tidak dapat bermain di luar."}
+];
+const choices = [
+ {name:"Gembira",emoji:"😊"},{name:"Sedih",emoji:"😢"},
+ {name:"Marah",emoji:"😠"},{name:"Takut",emoji:"😨"}
+];
+let order=[], current=0, score=0, lives=3, timeLeft=600, running=false;
+let timerId=null, selected=-1, handHoldStart=0, lastGesture="", cameraObj=null, handsObj=null, busy=false;
+const $=id=>document.getElementById(id);
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+function closeIntro(){$("intro").classList.add("hidden")}
+function closeResult(){$("result").classList.add("hidden")}
+function startGame(){
+ if(running)return;
+ if(current>=questions.length || lives<=0 || timeLeft<=0) resetState();
+ running=true; $("startBtn").disabled=true; $("gameState").textContent="Misi sedang berjalan";
+ $("feedback").textContent="Pilih jawapan yang paling tepat!";
+ renderQuestion();
+ timerId=setInterval(()=>{
+   if(!running)return;
+   timeLeft--; updateStats();
+   if(timeLeft<=0) endGame("Masa Tamat!");
+ },1000);
+}
+function resetState(){
+ clearInterval(timerId);order=shuffle(questions.map((_,i)=>i));current=0;score=0;lives=3;timeLeft=600;selected=-1;updateStats();
+}
+function restartGame(){running=false;resetState();$("startBtn").disabled=false;$("gameState").textContent="Bersedia";$("scenario").textContent="Tekan “Mula Misi” untuk memulakan permainan.";$("hint").textContent="Fikirkan perasaan watak berdasarkan situasi yang berlaku.";$("questionCount").textContent="Soalan 1 daripada 10";$("progress").style.width="0%";$("feedback").textContent="";renderChoices();$("fireBtn").disabled=true}
+function updateStats(){
+ const m=Math.floor(timeLeft/60),s=timeLeft%60;
+ $("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+ $("score").textContent=score;$("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);
+}
+function renderChoices(){
+ $("answers").innerHTML=choices.slice(0,3).map((c,i)=>`<button class="answer" data-index="${i}" onclick="mouseSelect(${i})"><span class="emoji">${c.emoji}</span><span class="word">${c.name}</span></button>`).join("");
+}
+function renderQuestion(){
+ if(current>=order.length){endGame("Semua Kes Selesai!");return}
+ selected=-1;renderChoices();
+ const q=questions[order[current]];
+ $("scenario").textContent=q.q;$("hint").textContent="Apakah emosi yang dirasai oleh watak dalam situasi ini?";
+ $("questionCount").textContent=`Soalan ${current+1} daripada ${questions.length}`;
+ $("progress").style.width=(current/questions.length*100)+"%";
+ $("fireBtn").disabled=true;$("feedback").textContent="Pilih satu jawapan.";
+}
+function selectAnswer(i){
+ if(!running||busy)return;
+ selected=i;
+ document.querySelectorAll(".answer").forEach((el,j)=>el.classList.toggle("selected",j===i));
+ $("fireBtn").disabled=false;
+ $("feedback").textContent=`Pilihan: ${choices[i].name}. Genggam tangan atau tekan “Lancarkan Kilat”.`;
+}
+function mouseSelect(i){selectAnswer(i)}
+function fireAnswer(){
+ if(!running||selected<0||busy)return;
+ busy=true;
+ const q=questions[order[current]], chosen=choices[selected].name;
+ $("flash").classList.remove("go");void $("flash").offsetWidth;$("flash").classList.add("go");
+ const correct=chosen===q.a;
+ if(correct){score+=10;$("feedback").textContent="⚡ Tepat sekali! "+q.why;playTone(660,.16);document.querySelectorAll(".answer")[selected]?.classList.add("correct")}
+ else{lives--;$("feedback").textContent="Belum tepat. "+q.why;playTone(190,.22);document.querySelectorAll(".answer")[selected]?.classList.add("wrong")}
+ updateStats();$("fireBtn").disabled=true;
+ setTimeout(()=>{
+   busy=false;current++;
+   if(lives<=0){endGame("Nyawa Habis!");return}
+   if(current>=questions.length){endGame("Semua Kes Selesai!");return}
+   renderQuestion();
+ },1350);
+}
+function endGame(title){
+ running=false;clearInterval(timerId);$("startBtn").disabled=false;$("gameState").textContent="Misi tamat";$("progress").style.width=Math.min(100,current/questions.length*100)+"%";
+ $("resultTitle").textContent=title;
+ $("resultIcon").textContent=score>=70?"🏆":"⚡";
+ $("resultText").innerHTML=`Markah kamu: <b>${score} / 100</b><br>Kes diselesaikan: <b>${Math.min(current,10)} / 10</b><br><br>Terima kasih kerana menjadi Detektif Emosi!`;
+ $("result").classList.remove("hidden");
+}
+function playTone(freq,duration){
+ try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=freq;gain.gain.setValueAtTime(.12,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration);osc.start();osc.stop(ctx.currentTime+duration)}catch(e){}
+}
+async function enableCamera(){
+ if(!navigator.mediaDevices?.getUserMedia){$("cameraStatus").textContent="Pelayar ini tidak menyokong akses kamera. Cuba Google Chrome.";return}
+ try{
+  const video=$("inputVideo");
+  const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480},audio:false});
+  video.srcObject=stream;await video.play();
+  $("cameraStatus").textContent="Kamera aktif. Tunjukkan tapak tangan terbuka untuk memilih jawapan.";
+  $("cameraBtn").textContent="Kamera Aktif";
+  if(typeof Hands==="undefined"){ $("cameraStatus").textContent="Kamera aktif, tetapi MediaPipe gagal dimuatkan. Semak sambungan internet.";return}
+  handsObj=new Hands({locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+  handsObj.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:.65,minTrackingConfidence:.6});
+  handsObj.onResults(onHandResults);
+  const process=async()=>{if(video.readyState>=2&&!busy){await handsObj.send({image:video})}if(cameraObj)requestAnimationFrame(process)};
+  cameraObj=true;process();
+ }catch(err){$("cameraStatus").textContent="Tidak dapat mengakses kamera. Benarkan kebenaran kamera pada Chrome dan Windows."}
+}
+function onHandResults(results){
+ if(!running||busy||!results.multiHandLandmarks||!results.multiHandLandmarks.length)return;
+ const lm=results.multiHandLandmarks[0];
+ const tips=[8,12,16,20], pips=[6,10,14,18];
+ let extended=0;for(let i=0;i<4;i++)if(lm[tips[i]].y<lm[pips[i]].y)extended++;
+ const fist=extended<=1;
+ if(fist){
+   if(selected>=0 && lastGesture!=="fist"){lastGesture="fist";fireAnswer()}
+   return;
+ }
+ lastGesture="open";
+ if(extended>=3){
+   const x=1-lm[9].x; // mirror correction for selfie view
+   const idx=Math.max(0,Math.min(2,Math.floor(x*3)));
+   if(idx!==selected){selectAnswer(idx)}
+ }
+}
+window.addEventListener("beforeunload",()=>{if($("inputVideo").srcObject)$("inputVideo").srcObject.getTracks().forEach(t=>t.stop())});
+</script>
+</body>
+</html>
